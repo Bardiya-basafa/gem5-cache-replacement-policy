@@ -1,0 +1,39 @@
+streaming
+    Dueling
+system.cpu.ipc                               0.250144                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+
+    LIP
+system.cpu.ipc                               0.250139                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.014822                       # miss rate for overall accesses (Ratio)
+
+    LRU
+system.cpu.ipc                               0.250178                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.014818                       # miss rate for overall accesses (Ratio)
+
+
+high locality
+    Dueling
+system.cpu.ipc                               0.609613                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.000463                       # miss rate for overall accesses (Ratio)
+
+    LIP
+system.cpu.ipc                               0.609595                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.000464                       # miss rate for overall accesses (Ratio)
+
+    LRU
+system.cpu.ipc                               0.609805                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.000453                       # miss rate for overall accesses (Ratio)
+
+phase change
+    Dueling
+system.cpu.ipc                               0.261696                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.014630                       # miss rate for overall accesses (Ratio)
+
+    LIP
+system.cpu.ipc                               0.252456                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+system.cpu.dcache.overallMissRate::total     0.015762                       # miss rate for overall accesses (Ratio)
+
+    LRU
+system.cpu.dcache.overallMissRate::total     0.014518                       # miss rate for overall accesses (Ratio)
+system.cpu.ipc                               0.262646                       # IPC: instructions per cycle (core level) ((Count/Cycle))
+
