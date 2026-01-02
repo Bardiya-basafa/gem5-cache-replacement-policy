@@ -83,7 +83,6 @@ system.membus = SystemXBar()
 
 # Build caches first so we can read their assoc to set team_size correctly
 l1_assoc = 4
-l2_assoc = 8
 
 
 # Create DuelingRP for L1 and L2 with required parameters
@@ -111,7 +110,6 @@ def make_duel(
 
 duel_l1d = make_duel(constituency_size=64, team_size=l1_assoc)
 duel_l1i = make_duel(constituency_size=64, team_size=l1_assoc)
-duel_l2 = make_duel(constituency_size=128, team_size=l2_assoc)
 
 # L1 caches (assoc=4 → team_size must be 4)
 system.cpu.icache = Cache(
