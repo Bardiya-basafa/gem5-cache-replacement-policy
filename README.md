@@ -111,11 +111,11 @@ How the outputs were generated for this study:
 **The phase-change workload alternates between matrix multiplication (high locality) and stencil operations (streaming) across six phases, simulating applications with varying memory access patterns.** Each even phase reuses data within small matrices (temporal locality), while odd phases stream through large arrays (sequential access), creating a realistic scenario where optimal policy changes dynamically. This workload tests adaptive mechanisms' ability to detect and respond to shifting access patterns, challenging static policies that excel at one pattern but fail at the other.
 ## Structure Of Simulations
 ### LRU
-![alt](lru.png)
+![alt](./pictures/lru.png)
 ### LIP
-![alt](lip.png)
+![alt](./pictures/lip.png)
 ### Dueling
-![alt](dueling.png)
+![alt](./pictures/dueling.png)
 
 
 ## Results & Comparison
