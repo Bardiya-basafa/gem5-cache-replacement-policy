@@ -1,34 +1,94 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
-int main(int argc, char** argv) {
-    size_t KB = 1024, MB = 1024 * 1024;
-    size_t hot_kb     = (argc > 1) ? strtoull(argv[1], NULL, 0) : 32;  // 32 KB
-    size_t cold_mb    = (argc > 2) ? strtoull(argv[2], NULL, 0) : 4;   // 4 MB
-    int    phases     = (argc > 3) ? atoi(argv[3]) : 2;                // 2 phases
-    int    hot_reps   = (argc > 4) ? atoi(argv[4]) : 20;               // 20 loops
-    size_t hot_stride = (argc > 5) ? strtoull(argv[5], NULL, 0) : 8;   // 8 elems
+// --- TUNABLE PARAMETERS ---
+// Size for the high-locality phase (Matrix Multiplication)
+#define MATRIX_SIZE 64
 
-    size_t hot_n  = (hot_kb * KB) / sizeof(uint64_t);
-    size_t cold_n = (cold_mb * MB) / sizeof(uint64_t);
+// Size for the streaming phase (Stencil Calculation)
+#define STENCIL_SIZE 16384 // 64KB array
 
-    uint64_t *hot  = (uint64_t*) malloc(hot_n  * sizeof(uint64_t));
-    uint64_t *cold = (uint64_t*) malloc(cold_n * sizeof(uint64_t));
-    if (!hot || !cold) { perror("malloc"); return 1; }
+// Number of timesteps to run the stencil in each streaming phase
+#define STENCIL_TIMESTEPS_PER_PHASE 15
 
-    for (size_t i=0; i<hot_n;  i++) hot[i]  = i;
-    for (size_t i=0; i<cold_n; i++) cold[i] = i;
+// Total number of phases to run (must be an even number to be balanced)
+#define NUM_PHASES 6
 
-    volatile uint64_t s = 0;
-    for (int p=0; p<phases; p++) {
-        for (int r=0; r<hot_reps; r++)
-            for (size_t i=0; i<hot_n; i+=hot_stride) s += hot[i];
-        for (size_t i=0; i<cold_n; i++) s += cold[i];
+// --- Phase 1: High Locality Workload ---
+void run_locality_phase(int A[MATRIX_SIZE][MATRIX_SIZE],
+                        int B[MATRIX_SIZE][MATRIX_SIZE],
+                        int C[MATRIX_SIZE][MATRIX_SIZE]) {
+    for (int i = 0; i < MATRIX_SIZE; ++i) {
+        for (int j = 0; j < MATRIX_SIZE; ++j) {
+            for (int k = 0; k < MATRIX_SIZE; ++k) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+}
+
+// --- Phase 2: Streaming Workload ---
+void run_streaming_phase(int *current_grid, int *next_grid) {
+    for (int t = 0; t < STENCIL_TIMESTEPS_PER_PHASE; ++t) {
+        for (int i = 1; i < STENCIL_SIZE - 1; ++i) {
+            next_grid[i] = (current_grid[i - 1] + current_grid[i] + current_grid[i + 1]) / 3;
+        }
+        // Swap pointers for the next iteration
+        int *temp = current_grid;
+        current_grid = next_grid;
+        next_grid = temp;
+    }
+}
+
+int main() {
+    // --- Data for Locality Phase ---
+    // Declared static to avoid stack overflow; puts them in .bss section.
+    static int mat_A[MATRIX_SIZE][MATRIX_SIZE];
+    static int mat_B[MATRIX_SIZE][MATRIX_SIZE];
+    static int mat_C[MATRIX_SIZE][MATRIX_SIZE];
+
+    // --- Data for Streaming Phase ---
+    int *stencil_grid1 = (int*)malloc(STENCIL_SIZE * sizeof(int));
+    int *stencil_grid2 = (int*)malloc(STENCIL_SIZE * sizeof(int));
+    if (stencil_grid1 == NULL || stencil_grid2 == NULL) {
+        printf("Error: Memory allocation failed!\n");
+        return 1;
     }
 
-    printf("sum=%llu\n", (unsigned long long)s);
-    printf("phase change finished\n");
-    free(hot); free(cold);
+    // --- Initialize all data structures ---
+    for (int i = 0; i < MATRIX_SIZE; ++i) {
+        for (int j = 0; j < MATRIX_SIZE; ++j) {
+            mat_A[i][j] = i; mat_B[i][j] = j; mat_C[i][j] = 0;
+        }
+    }
+    for (int i = 0; i < STENCIL_SIZE; ++i) {
+        stencil_grid1[i] = i % 100;
+        stencil_grid2[i] = 0;
+    }
+
+    printf("Starting phase-change workload with %d phases...\n", NUM_PHASES);
+
+    // --- Main Execution Loop ---
+    for (int p = 0; p < NUM_PHASES; ++p) {
+        if (p % 2 == 0) {
+            // Even phases are high-locality
+            printf("--- Starting Phase %d (Locality: Matrix Multiplication) ---\n", p);
+            run_locality_phase(mat_A, mat_B, mat_C);
+        } else {
+            // Odd phases are streaming
+            printf("--- Starting Phase %d (Streaming: Stencil Calculation) ---\n", p);
+            run_streaming_phase(stencil_grid1, stencil_grid2);
+        }
+    }
+
+    printf("Phase-change workload finished.\n");
+
+    // Print a result from each workload to prevent optimization
+    printf("Final Matrix Result C[0][0]: %d\n", mat_C[0][0]);
+    printf("Final Stencil Result grid[SIZE/2]: %d\n", stencil_grid1[STENCIL_SIZE / 2]);
+
+    free(stencil_grid1);
+    free(stencil_grid2);
+
     return 0;
 }
