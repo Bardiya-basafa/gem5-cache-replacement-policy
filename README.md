@@ -33,7 +33,7 @@ ___
 ```
 ___
 ### C++ Components
-***C++ classes implement the detailed timing models and hardware behaviors that execute simulations cycle-by-cycle.** Each component (like Cache, CPU, or DRAM controller) is a C++ object with ports, events, and statistics tracking. When configured via Python, these objects connect through ports to form a complete system.
+**C++ classes implement the detailed timing models and hardware behaviors that execute simulations cycle-by-cycle.** Each component (like Cache, CPU, or DRAM controller) is a C++ object with ports, events, and statistics tracking. When configured via Python, these objects connect through ports to form a complete system.
 ___
 ### Python Components
 **Python scripts act as "architectural blueprints"—they instantiate C++ objects, set parameters, connect components, and describe the target workload.** The `m5` module bridges Python and C++, allowing Python to drive simulation while C++ handles performance-critical execution. This separation enables rapid prototyping of new architectures through Python configuration while maintaining the speed and accuracy of C++ simulation models.
