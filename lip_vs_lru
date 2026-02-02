@@ -1,0 +1,21 @@
+Cache: [MRU] A B C D [LRU]  (4-way associative)
+
+Sequential Access Pattern: A, B, C, D, E, F, G, H
+
+Traditional LRU:
+Access A -> Cache: [A] (insert at MRU)
+Access B -> Cache: [B, A]
+Access C -> Cache: [C, B, A]
+Access D -> Cache: [D, C, B, A]
+Access E -> Cache: [E, D, C, B]  (A evicted)
+Access F -> Cache: [F, E, D, C]  (B evicted)
+... Cache constantly churns with scanning data!
+
+LIP:
+Access A -> Cache: [A] (insert at LRU position)
+Access B -> Cache: [A, B] (B inserted at LRU)
+Access C -> Cache: [A, B, C]
+Access D -> Cache: [A, B, C, D]
+Access E -> Cache: [A, B, C, E]  (D evicted, but useful A/B/C remain!)
+Access F -> Cache: [A, B, C, F]  (E evicted)
+... Useful data (A/B/C) is preserved!
